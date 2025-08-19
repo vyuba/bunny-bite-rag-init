@@ -8,22 +8,32 @@ export default async ({ req, res, log, error }) => {
     .setEndpoint(process.env.APPWRITE_FUNCTION_API_ENDPOINT)
     .setProject(process.env.APPWRITE_FUNCTION_PROJECT_ID)
     .setKey(req.headers['x-appwrite-key'] ?? '');
-  const users = new Users(client);
+  // const users = new Users(client);
 
-  try {
-    log(req.bodyJson);
-    // pcIndex.upsert([
-    //   {
-    //     id: '1',
-    //     values: [1, 2, 3],
-    //     metadata: {
-    //       name: 'bunny-bite',
-    //     },
-    //   },
-    // ]);
-  } catch (err) {
-    error('Could not list users: ' + err.message);
-  }
+  // try {
+  log(req.bodyText); // Raw request body, contains request data
+  log(JSON.stringify(req.bodyJson)); // Object from parsed JSON request body, otherwise string
+  log(JSON.stringify(req.headers)); // String key-value pairs of all request headers, keys are lowercase
+  log(req.scheme); // Value of the x-forwarded-proto header, usually http or https
+  log(req.method); // Request method, such as GET, POST, PUT, DELETE, PATCH, etc.
+  log(req.url); // Full URL, for example: http://awesome.appwrite.io:8000/v1/hooks?limit=12&offset=50
+  log(req.host); // Hostname from the host header, such as awesome.appwrite.io
+  log(req.port); // Port from the host header, for example 8000
+  log(req.path); // Path part of URL, for example /v1/hooks
+  log(req.queryString); // Raw query params string. For example "limit=12&offset=50"
+  log(JSON.stringify(req.query));
+  // pcIndex.upsert([
+  //   {
+  //     id: '1',
+  //     values: [1, 2, 3],
+  //     metadata: {
+  //       name: 'bunny-bite',
+  //     },
+  //   },
+  // ]);
+  // } catch (err) {
+  //   error('Could not list users: ' + err.message);
+  // }
 
   return res.json({
     success: true,
