@@ -11,7 +11,7 @@ export default async ({ req, res, log, error }) => {
   const users = new Users(client);
 
   try {
-    console.log(req.bodyJson);
+    log(req.bodyJson);
     // pcIndex.upsert([
     //   {
     //     id: '1',
@@ -29,3 +29,10 @@ export default async ({ req, res, log, error }) => {
     success: true,
   });
 };
+
+// // The req object contains the request data
+// if (req.path === "/ping") {
+//   // Use res object to respond with text(), json(), or binary()
+//   // Don't forget to return a response!
+//   return res.text("Pong");
+// }
