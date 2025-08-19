@@ -11,8 +11,8 @@ export default async ({ req, res, log, error }) => {
   // const users = new Users(client);
 
   // try {
-  log(req); // Raw request body, contains request data
-  // log(JSON.stringify(req.bodyJson)); // Object from parsed JSON request body, otherwise string
+  // log(req); // Raw request body, contains request data
+  log(JSON.stringify(req.bodyJson)); // Object from parsed JSON request body, otherwise string
   // log(JSON.stringify(req.headers)); // String key-value pairs of all request headers, keys are lowercase
   log(req.url); // Full URL, for example: http://awesome.appwrite.io:8000/v1/hooks?limit=12&offset=50
   log(req.host); // Hostname from the host header, such as awesome.appwrite.io
