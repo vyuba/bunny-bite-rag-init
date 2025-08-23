@@ -25,7 +25,7 @@ export default async ({ req, res, log, error }) => {
     process.env.SESSION_COLLECTION_ID,
     `offline_${shop}`
   );
-  console.log('session:', session);
+  console.log('session:', response);
 
   if (!response) {
     return res.json({ error: 'Could not find a session' }, { status: 404 });
