@@ -1,6 +1,7 @@
 import { Client, Databases } from 'node-appwrite';
 import { pcIndex } from './pinecone.js';
 import { shopify } from './shopify.js';
+import { Session } from '@shopify/shopify-api';
 
 // This Appwrite function will be executed every time your function is triggered
 export default async ({ req, res, log, error }) => {
@@ -19,14 +20,14 @@ export default async ({ req, res, log, error }) => {
 
   // const { shopify, appwritesessionStorage } = await getShopify();
 
-  const session = await database.getDocument(
+  const response = await database.getDocument(
     process.env.DATABASE_ID,
     process.env.SESSION_COLLECTION_ID,
     `offline_${shop}`
   );
   console.log('session:', session);
 
-  if (!session) {
+  if (!response) {
     return res.json({ error: 'Could not find a session' }, { status: 404 });
   }
 
@@ -53,17 +54,20 @@ export default async ({ req, res, log, error }) => {
             }
           }`;
     // shopify client initialization
+    const cleanDocument = {
+      id: response.$id,
+      shop: response.shop,
+      state: response.state,
+      isOnline: response.isOnline,
+      scope: response.scope,
+      accessToken: response.accessToken,
+      expires: response.expires,
+      onlineAccessInfo: response.onlineAccessInfo,
+    };
 
-    const client = new shopify.clients.Graphql({
-      id: session.$id,
-      shop: session.shop,
-      state: session.state,
-      isOnline: session.isOnline,
-      scope: session.scope,
-      accessToken: session.accessToken,
-      expires: session.expires,
-      onlineAccessInfo: session.onlineAccessInfo,
-    });
+    const session = new Session(cleanDocument);
+
+    const client = new shopify.clients.Graphql({ session });
 
     const products = await client.request(queryString);
 
