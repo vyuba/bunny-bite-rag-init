@@ -1,6 +1,6 @@
 import { Client, Databases } from 'node-appwrite';
-import shopify from './shopify.js';
 import { pcIndex } from './pinecone.js';
+import { shopify } from './shopify.js';
 
 // This Appwrite function will be executed every time your function is triggered
 export default async ({ req, res, log, error }) => {
@@ -52,10 +52,19 @@ export default async ({ req, res, log, error }) => {
                 }
             }
           }`;
-
     // shopify client initialization
 
-    const client = new shopify.clients.Graphql({ session });
+    const client = new shopify.clients.Graphql({
+      id: session.$id,
+      shop: session.shop,
+      state: session.state,
+      isOnline: session.isOnline,
+      scope: session.scope,
+      accessToken: session.accessToken,
+      expires: session.expires,
+      onlineAccessInfo: session.onlineAccessInfo,
+    });
+
     const products = await client.request(queryString);
 
     // logging when getting products error
