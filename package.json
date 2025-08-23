@@ -9,6 +9,7 @@
   },
   "dependencies": {
     "@pinecone-database/pinecone": "^6.1.2",
+    "@shopify/shopify-api": "^11.14.1",
     "node-appwrite": "^14.1.0"
   },
   "devDependencies": {
