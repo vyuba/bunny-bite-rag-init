@@ -1,5 +1,7 @@
 import { shopifyApi, LATEST_API_VERSION } from '@shopify/shopify-api';
 
+import '@shopify/shopify-api/adapters/node';
+
 export default shopify = shopifyApi({
   apiKey: process.env.SHOPIFY_API_KEY,
   apiSecretKey: process.env.SHOPIFY_API_SECRET,
