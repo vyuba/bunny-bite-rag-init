@@ -2,6 +2,7 @@ import { Client, Databases } from 'node-appwrite';
 import { pcIndex } from './pinecone.js';
 import { shopify } from './shopify.js';
 import { Session } from '@shopify/shopify-api';
+import { model } from './openai.js';
 
 // This Appwrite function will be executed every time your function is triggered
 export default async ({ req, res, log, error }) => {
@@ -75,7 +76,7 @@ export default async ({ req, res, log, error }) => {
 
     if (products.errors) {
       console.log(products.errors);
-      return NextResponse.json({ status: 400, error: products.errors });
+      return res.json({ status: 400, error: products.errors });
     }
 
     // creating an embedding for the products
