@@ -1,5 +1,6 @@
 import { Client, Databases } from 'node-appwrite';
-import shopify from './shopify';
+import shopify from './shopify.js';
+import { pcIndex } from './pinecone.js';
 
 // This Appwrite function will be executed every time your function is triggered
 export default async ({ req, res, log, error }) => {
