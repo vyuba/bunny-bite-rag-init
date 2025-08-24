@@ -83,21 +83,26 @@ export default async ({ req, res, log, error }) => {
 
     const productsEmbedingResponse = await Promise.all(
       products.data.products.nodes.map(async (product) => {
-        const productsEmbeding = await model.embedQuery(
-          // JSON.stringify(product)
-          `${product.title}. ${product.description}. ${product.priceRangeV2.minVariantPrice.amount}`
-        );
-        return {
-          id: product.id,
-          values: productsEmbeding,
-          metadata: {
-            title: product.title,
-            description: product.description,
-            price: product.priceRangeV2.minVariantPrice.amount,
-            shop: shop,
-            shopId: $id,
-          },
-        };
+        try {
+          const productsEmbeding = await model.embedQuery(
+            // JSON.stringify(product)
+            `${product.title}. ${product.description}. ${product.priceRangeV2.minVariantPrice.amount}`
+          );
+          return {
+            id: product.id,
+            values: productsEmbeding,
+            metadata: {
+              title: product.title,
+              description: product.description,
+              price: product.priceRangeV2.minVariantPrice.amount,
+              shop: shop,
+              shopId: $id,
+            },
+          };
+        } catch (err) {
+          log('Embedding error:', err.message);
+          return null;
+        }
       })
     );
 
@@ -109,7 +114,7 @@ export default async ({ req, res, log, error }) => {
       {
         success: true,
       },
-      { status: 200 }
+      200
     );
   } catch (error) {
     log(error);
@@ -117,7 +122,7 @@ export default async ({ req, res, log, error }) => {
       {
         success: false,
       },
-      { status: 500 }
+      500
     );
   }
 };
