@@ -15,6 +15,9 @@ export default async ({ req, res, log, error }) => {
 
   const database = new Databases(client);
 
+  log(req.bodyText); // Raw request body, contains request data
+  log(req.bodyJson);
+
   const { shop, $id } = req.bodyJson;
 
   //init shopify
@@ -26,7 +29,7 @@ export default async ({ req, res, log, error }) => {
     process.env.SESSION_COLLECTION_ID,
     `offline_${shop}`
   );
-  console.log('session:', response);
+  log('session:', response);
 
   if (!response) {
     return res.json({ error: 'Could not find a session' }, { status: 404 });
