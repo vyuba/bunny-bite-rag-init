@@ -6,6 +6,7 @@ import { model } from './openai.js';
 
 export default async ({ req, res, log, error }) => {
   try {
+    log('req headers', req.headers);
     const event = req.headers['x-appwrite-event'];
     const doc = req.bodyJson;
 
