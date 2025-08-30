@@ -10,159 +10,168 @@ export default async ({ req, res, log, error }) => {
     const event = req.headers['x-appwrite-event'];
     const doc = req.bodyJson;
 
-    const client = new Client()
-      .setEndpoint(process.env.APPWRITE_FUNCTION_API_ENDPOINT)
-      .setProject(process.env.APPWRITE_FUNCTION_PROJECT_ID)
-      .setKey(req.headers['x-appwrite-key'] ?? '');
-
-    const database = new Databases(client);
-
-    if (!doc) {
-      log('No document payload found');
-      return res.json({ ok: false }, 400);
-    }
-
-    // Common fields
-    const {
-      $id,
-      shop,
-      user,
-      shop_number,
-      twillio_auth_token,
-      twillio_account_siid,
-    } = doc;
-
-    // Create event
-    if (event.includes('.create')) {
-      // 1. List Pinecone namespaces
-      const nsList = await pcIndex.listNamespaces();
-      const exists = nsList.namespaces.find((ns) => ns.name === `__${shop}__`);
-
-      if (exists) {
-        // Notify user because shop already exists
-        await database.createDocument(
-          process.env.DATABASE_ID,
-          process.env.APPWRITE_NOTIFICATION_COLLECTION_ID,
-          ID.unique(),
-          {
-            user_id: user,
-            message:
-              'You already added the namespace added details. Thank you!',
-          }
-        );
-        return res.json({ ok: true }, 200);
+    const response = await fetch(
+      `https://bunny-bite.vercel.app/api/webhooks/appwrite/rag-products`,
+      {
+        method: 'POST',
+        headers: req.headers,
+        body: JSON.stringify(req.bodyJson),
       }
+    );
 
-      // 2. Fetch products from Shopify
+    // const client = new Client()
+    //   .setEndpoint(process.env.APPWRITE_FUNCTION_API_ENDPOINT)
+    //   .setProject(process.env.APPWRITE_FUNCTION_PROJECT_ID)
+    //   .setKey(req.headers['x-appwrite-key'] ?? '');
 
-      //init shopify
+    // const database = new Databases(client);
 
-      // const { shopify, appwritesessionStorage } = await getShopify();
+    // if (!doc) {
+    //   log('No document payload found');
+    //   return res.json({ ok: false }, 400);
+    // }
 
-      const response = await database.getDocument(
-        process.env.DATABASE_ID,
-        process.env.SESSION_COLLECTION_ID,
-        `offline_${shop}`
-      );
-      log('session:', response);
+    // // Common fields
+    // const {
+    //   $id,
+    //   shop,
+    //   user,
+    //   shop_number,
+    //   twillio_auth_token,
+    //   twillio_account_siid,
+    // } = doc;
 
-      if (!response) {
-        return res.json({ error: 'Could not find a session' }, { status: 404 });
-      }
-      //query for getting products
+    // // Create event
+    // if (event.includes('.create')) {
+    //   // 1. List Pinecone namespaces
+    //   const nsList = await pcIndex.listNamespaces();
+    //   const exists = nsList.namespaces.find((ns) => ns.name === `__${shop}__`);
 
-      const queryString = `query {
-      products(first: 10) {
-          nodes {
-              id
-              title
-              description
-              priceRangeV2 {
-                minVariantPrice {
-                  amount
-                  currencyCode
-                }
-                maxVariantPrice {
-                  amount
-                  currencyCode
-                }
-              }
-          }
-      }
-    }`;
-      // shopify client initialization
-      const cleanDocument = {
-        id: response.$id,
-        shop: response.shop,
-        state: response.state,
-        isOnline: response.isOnline,
-        scope: response.scope,
-        accessToken: response.accessToken,
-        expires: response.expires,
-        onlineAccessInfo: response.onlineAccessInfo,
-      };
+    //   if (exists) {
+    //     // Notify user because shop already exists
+    //     await database.createDocument(
+    //       process.env.DATABASE_ID,
+    //       process.env.APPWRITE_NOTIFICATION_COLLECTION_ID,
+    //       ID.unique(),
+    //       {
+    //         user_id: user,
+    //         message:
+    //           'You already added the namespace added details. Thank you!',
+    //       }
+    //     );
+    //     return res.json({ ok: true }, 200);
+    //   }
 
-      const session = new Session(cleanDocument);
+    //   // 2. Fetch products from Shopify
 
-      const client = new shopify.clients.Graphql({ session });
+    //   //init shopify
 
-      const products = await client.request(queryString);
+    //   // const { shopify, appwritesessionStorage } = await getShopify();
 
-      // logging when getting products error
+    //   const response = await database.getDocument(
+    //     process.env.DATABASE_ID,
+    //     process.env.SESSION_COLLECTION_ID,
+    //     `offline_${shop}`
+    //   );
+    //   log('session:', response);
 
-      if (products.errors) {
-        console.log(products.errors);
-        return res.json({ status: 400, error: products.errors });
-      }
+    //   if (!response) {
+    //     return res.json({ error: 'Could not find a session' }, { status: 404 });
+    //   }
+    //   //query for getting products
 
-      // 3. Embed + upsert into Pinecone
-      const vectors = await Promise.all(
-        products.data.products.nodes.map(async (product) => {
-          const emb = await model.embedQuery(
-            `${product.title}. ${product.description}. ${product.priceRangeV2.minVariantPrice.amount}`
-          );
-          return {
-            id: product.id,
-            values: emb,
-            metadata: {
-              title: product.title,
-              description: product.description,
-              price: product.priceRangeV2.minVariantPrice.amount,
-              shop: shop,
-              shopId: $id,
-            },
-          };
-        })
-      );
+    //   const queryString = `query {
+    //   products(first: 10) {
+    //       nodes {
+    //           id
+    //           title
+    //           description
+    //           priceRangeV2 {
+    //             minVariantPrice {
+    //               amount
+    //               currencyCode
+    //             }
+    //             maxVariantPrice {
+    //               amount
+    //               currencyCode
+    //             }
+    //           }
+    //       }
+    //   }
+    // }`;
+    //   // shopify client initialization
+    //   const cleanDocument = {
+    //     id: response.$id,
+    //     shop: response.shop,
+    //     state: response.state,
+    //     isOnline: response.isOnline,
+    //     scope: response.scope,
+    //     accessToken: response.accessToken,
+    //     expires: response.expires,
+    //     onlineAccessInfo: response.onlineAccessInfo,
+    //   };
 
-      await pcIndex.namespace(`__${shop}__`).upsert(vectors);
+    //   const session = new Session(cleanDocument);
 
-      // 4. Notify
-      await database.createDocument(
-        process.env.DATABASE_ID,
-        process.env.APPWRITE_NOTIFICATION_COLLECTION_ID,
-        ID.unique(),
-        { user_id: user, message: 'You just added your shop. Good job, champ!' }
-      );
-    }
+    //   const client = new shopify.clients.Graphql({ session });
 
-    // Update event
-    if (event.includes('.update')) {
-      // Check if Twilio fields or shop_number were added
-      if (twillio_account_siid || twillio_auth_token || shop_number) {
-        await database.createDocument(
-          process.env.DATABASE_ID,
-          process.env.APPWRITE_NOTIFICATION_COLLECTION_ID,
-          ID.unique(),
-          {
-            user_id: user,
-            message: 'Congrats on adding your Twilio/Shop details 🎉',
-          }
-        );
-      }
-    }
+    //   const products = await client.request(queryString);
 
-    return res.json({ ok: true }, 200);
+    //   // logging when getting products error
+
+    //   if (products.errors) {
+    //     console.log(products.errors);
+    //     return res.json({ status: 400, error: products.errors });
+    //   }
+
+    //   // 3. Embed + upsert into Pinecone
+    //   const vectors = await Promise.all(
+    //     products.data.products.nodes.map(async (product) => {
+    //       const emb = await model.embedQuery(
+    //         `${product.title}. ${product.description}. ${product.priceRangeV2.minVariantPrice.amount}`
+    //       );
+    //       return {
+    //         id: product.id,
+    //         values: emb,
+    //         metadata: {
+    //           title: product.title,
+    //           description: product.description,
+    //           price: product.priceRangeV2.minVariantPrice.amount,
+    //           shop: shop,
+    //           shopId: $id,
+    //         },
+    //       };
+    //     })
+    //   );
+
+    //   await pcIndex.namespace(`__${shop}__`).upsert(vectors);
+
+    //   // 4. Notify
+    //   await database.createDocument(
+    //     process.env.DATABASE_ID,
+    //     process.env.APPWRITE_NOTIFICATION_COLLECTION_ID,
+    //     ID.unique(),
+    //     { user_id: user, message: 'You just added your shop. Good job, champ!' }
+    //   );
+    // }
+
+    // // Update event
+    // if (event.includes('.update')) {
+    //   // Check if Twilio fields or shop_number were added
+    //   if (twillio_account_siid || twillio_auth_token || shop_number) {
+    //     await database.createDocument(
+    //       process.env.DATABASE_ID,
+    //       process.env.APPWRITE_NOTIFICATION_COLLECTION_ID,
+    //       ID.unique(),
+    //       {
+    //         user_id: user,
+    //         message: 'Congrats on adding your Twilio/Shop details 🎉',
+    //       }
+    //     );
+    //   }
+    // }
+
+    return res.json({ ok: true }, (await response).status);
   } catch (err) {
     error(err);
     return res.json({ ok: false, error: String(err) }, 500);
