@@ -1,8 +1,8 @@
-import { Client, Databases, ID } from 'node-appwrite';
-import { pcIndex } from './pinecone.js';
-import { shopify } from './shopify.js';
-import { Session } from '@shopify/shopify-api';
-import { model } from './openai.js';
+// import { Client, Databases, ID } from 'node-appwrite';
+// import { pcIndex } from './pinecone.js';
+// import { shopify } from './shopify.js';
+// import { Session } from '@shopify/shopify-api';
+// import { model } from './openai.js';
 
 export default async ({ req, res, log, error }) => {
   try {
